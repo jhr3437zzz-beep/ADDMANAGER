@@ -1,7 +1,7 @@
 from telethon.sync import TelegramClient
 from telethon.tl.functions.messages import GetDialogsRequest
 from telethon.tl.types import InputPeerEmpty, InputPeerChannel, InputPeerUser
-from telethon.errors.rpcerrorlist import PeerFloodError, UserPrivacyRestrictedError
+from telethon.errors.rpcerrorlist import PeerFloodError, UserPrivacyRestrictedError, FloodWaitError
 from telethon.errors.rpcbaseerrors import BadRequestError
 from telethon.tl.functions.channels import InviteToChannelRequest
 import sys
@@ -100,6 +100,12 @@ for user in users:
         client(InviteToChannelRequest(target_group_entity, [user_to_add]))
         print("Waiting for 60-180 Seconds...")
         time.sleep(random.randrange(0, 5))
+    except FloodWaitError as e:
+        print(f"⚠️ FloodWaitError: Telegram requires waiting {e.seconds} seconds ({e.seconds//3600} hours {(e.seconds%3600)//60} minutes)")
+        print(f"El script esperará {e.seconds//3600} horas antes de continuar...")
+        time.sleep(e.seconds)
+        print("✅ Reanudando después de esperar...")
+        continue
     except PeerFloodError:
         print("Getting Flood Error from telegram. Script is stopping now. Please try again after some time.")
         print("Waiting 24 hours before retrying...")
